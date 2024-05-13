@@ -16,7 +16,7 @@ def dividirDigitos(im2):
     _, region_binaria = cv2.threshold(region_gris, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     contornos, _ = cv2.findContours(region_binaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contornos = sorted(contornos, key=lambda x: cv2.boundingRect(x)[0]) 
-    digitos = []
+    digitos_codificados = []
     for contorno in contornos:
     # Obtener las coordenadas del rectángulo que rodea al contorno
         x, y, w, h = cv2.boundingRect(contorno)
@@ -26,19 +26,21 @@ def dividirDigitos(im2):
         y -= margen
         w += 2 * margen
         h += 2 * margen
+
         digito = region_gris[y:y+h, x:x+w]
                 # Asegurarse de que el dígito tenga un tamaño mínimo (ajustar según sea necesario)
+
+        # Aplicar umbral para convertir el dígito a blanco y negro
         if w > 15 and h > 15:
                     # Agregar el dígito a la lista de dígitos
-            digitos.append(digito)
-    digitos_codificados = []
-    for digito in digitos:
-        _, buffer = cv2.imencode('.png', digito)
-        base64_data = base64.b64encode(buffer).decode('utf-8')
-        digitos_codificados.append(base64_data)
+            digitobn = cv2.bitwise_not(digito)
+            _, buffer = cv2.imencode('.png', digitobn)
+            base64_data = base64.b64encode(buffer).decode('utf-8')
+            digitos_codificados.append(base64_data)   
     return digitos_codificados
 
-    
+
+  
 def predecirNumero(digitos):
     numeros=""
     for digito in digitos:
@@ -48,7 +50,7 @@ def predecirNumero(digitos):
     return numeros
 def extraxt_digit_from_image(image_bytes):
    
-    model = load_model('app/modelo_mnist.h5')
+    model = load_model('app/modelo_deteccion_numeros.h5')
    
     # Convertir la imagen a escala de grises
     image = Image.open(io.BytesIO(image_bytes)).convert('L')
