@@ -4,7 +4,6 @@ import numpy as np
 import io
 import cv2
 import base64
-import matplotlib.pyplot as plt
 def segmentar_imagen(image_bytes):
     im1=cv2.resize(image_bytes, (1496, 596))
     alto, ancho, _ = im1.shape
